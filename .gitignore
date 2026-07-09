@@ -1,0 +1,17 @@
+# Local macOS clutter
+.DS_Store
+
+# Dependency and build output folders
+node_modules/
+dist/
+src-tauri/target/
+
+# Local assistant/tooling folders
+.claude/
+
+# Private writing content
+journal/
+core_questions/
+
+# Generated icon backups that do not need to live in the repo
+src-tauri/icons/*.backup
