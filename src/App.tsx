@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useDeferredValue } from 'react'
 import Toolbar from './components/Toolbar'
 import Editor, { EditorBridge } from './components/Editor'
-import LeftIdeasPanel from './components/LeftIdeasPanel'
 import RightLibraryPanel from './components/RightLibraryPanel'
 import {
   exportMarkdownFile,
@@ -20,14 +19,13 @@ import {
   groupEntriesByMonth,
   getPlainTextFromHtml,
 } from './lib/journal'
-import { countWords, getFrequentWords, WordFrequency } from './lib/wordCount'
+import { countWords } from './lib/wordCount'
 import { MonthGroup } from './lib/journal'
 
 type SaveState = 'saved' | 'saving' | 'unsaved'
 type Theme = 'day' | 'night'
 
 const AUTOSAVE_DELAY = 800
-const WORD_FREQ_DELAY = 1200
 const RECENT_FILES_KEY = 'journal-recent-files'
 const MAX_RECENT_FILES = 8
 
@@ -56,6 +54,26 @@ function getFileLabel(filePath: string): string {
   return parts[parts.length - 1] || filePath
 }
 
+function getCompactFilePath(filePath: string): string {
+  const maxLength = 74
+  if (filePath.length <= maxLength) return filePath
+
+  const parts = filePath.split('/').filter(Boolean)
+
+  if (parts.length > 4) {
+    // Middle-truncate long paths so the launch screen still shows both the
+    // broad location and the actual file being opened.
+    const prefix = filePath.startsWith('/') ? '/' : ''
+    const start = `${prefix}${parts.slice(0, 4).join('/')}`
+    const end = parts.slice(-2).join('/')
+    const compactPath = `${start}/.../${end}`
+
+    if (compactPath.length <= maxLength) return compactPath
+  }
+
+  return `${filePath.slice(0, 30)}...${filePath.slice(-34)}`
+}
+
 export default function App() {
   const [html, setHtml] = useState('<p></p>')
   const [saveState, setSaveState] = useState<SaveState>('saved')
@@ -64,14 +82,12 @@ export default function App() {
   const [showSaveLight, setShowSaveLight] = useState(getInitialSaveLightSetting)
   const [fileOpen, setFileOpen] = useState(false)
   const [recentFiles, setRecentFiles] = useState(getInitialRecentFiles)
-  const [wordFreqs, setWordFreqs] = useState<WordFrequency[]>([])
   const [monthGroups, setMonthGroups] = useState<MonthGroup[]>([])
   const [todayWords, setTodayWords] = useState(0)
   const [totalWords, setTotalWords] = useState(0)
   const [scrollToDate, setScrollToDate] = useState<Date | null>(null)
 
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const wordFreqTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const htmlRef = useRef(html)
   const editorBridgeRef = useRef<EditorBridge | null>(null)
   const deferredHtml = useDeferredValue(html)
@@ -110,8 +126,8 @@ export default function App() {
     setRecentFiles((current) => current.filter((item) => item !== targetPath))
   }
 
-  // Recompute the side panels from a deferred copy of the document so typing
-  // can stay responsive even when the journal file is large.
+  // Recompute the date library and word totals from a deferred copy of the
+  // document so typing can stay responsive even when the journal file is large.
   useEffect(() => {
     const today = new Date()
     const entries = extractEntries(deferredHtml)
@@ -120,11 +136,6 @@ export default function App() {
     setTodayWords(countWords(getCurrentDaySection(deferredHtml, today)))
     setTotalWords(countWords(fullText))
     setMonthGroups(groupEntriesByMonth(entries))
-
-    if (wordFreqTimer.current) clearTimeout(wordFreqTimer.current)
-    wordFreqTimer.current = setTimeout(() => {
-      setWordFreqs(getFrequentWords(fullText, { topN: 30 }))
-    }, WORD_FREQ_DELAY)
   }, [deferredHtml])
 
   const handleChange = useCallback((value: string) => {
@@ -230,7 +241,6 @@ export default function App() {
         fileOpen={fileOpen}
       />
       <div className="layout">
-        <LeftIdeasPanel words={wordFreqs} />
         {fileOpen ? (
           <Editor
             value={html}
@@ -254,15 +264,24 @@ export default function App() {
                 <div className="empty-state-recents">
                   <div className="empty-state-recents-label">recent files</div>
                   {recentFiles.map((recentPath) => (
-                    <button
-                      key={recentPath}
-                      className="empty-state-recent-btn"
-                      onClick={() => handleOpenRecentFile(recentPath)}
-                      title={recentPath}
-                    >
-                      <span className="empty-state-recent-name">{getFileLabel(recentPath)}</span>
-                      <span className="empty-state-recent-path">{recentPath}</span>
-                    </button>
+                    <div key={recentPath} className="empty-state-recent-row">
+                      <button
+                        className="empty-state-recent-btn"
+                        onClick={() => handleOpenRecentFile(recentPath)}
+                        title={recentPath}
+                      >
+                        <span className="empty-state-recent-name">{getFileLabel(recentPath)}</span>
+                        <span className="empty-state-recent-path">{getCompactFilePath(recentPath)}</span>
+                      </button>
+                      <button
+                        className="empty-state-recent-remove"
+                        onClick={() => forgetRecentFile(recentPath)}
+                        title={`Remove ${getFileLabel(recentPath)} from recent files`}
+                        aria-label={`Remove ${getFileLabel(recentPath)} from recent files`}
+                      >
+                        remove
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}

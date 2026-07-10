@@ -11,7 +11,7 @@ Journal is a lightweight local-first writing app for keeping a long-running jour
 - Autosaves while you write
 - Adds a `new day` section with a dated heading
 - Includes a typewriter mode for centered writing
-- Includes collapsible side panels for repeated-word "ideas" and a dated entry library
+- Includes a collapsible dated entry library on the right-hand side
 - Shows recent files on launch so the last journal can be reopened quickly
 
 ## How It Works
@@ -23,14 +23,14 @@ At a high level:
 1. The app opens or creates an HTML journal file.
 2. The file body is loaded into the editor.
 3. As you type, the app updates local state and autosaves the latest content back to disk.
-4. The app also parses dated headings to build the right-hand library and counts repeated words to build the ideas panel.
+4. The app also parses dated headings to build the right-hand library and keeps running word totals for the current day and year.
 
 ## Project Structure
 
 - `src/`
   Frontend app code, including the main app shell, editor, toolbar, and side panels.
 - `src/components/`
-  UI pieces such as the editor, top toolbar, ideas panel, and library panel.
+  UI pieces such as the editor, top toolbar, and library panel.
 - `src/lib/`
   File handling, date parsing, journal parsing, word counting, and typewriter logic.
 - `src-tauri/`

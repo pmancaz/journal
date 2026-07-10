@@ -9,9 +9,8 @@
 This looks like a lightweight daily journal for writing into one long file while still keeping navigation and review simple.
 
 Evidence from the current code:
-- The toolbar centers on `new file`, `open file`, `export md`, and `new day`.
-- `new day` appends a dated `h2` section if that date is not already present.
-- The left sidebar turns the current document into a small "ideas" list by counting repeated words.
+- The toolbar centers on `new file`, `open file`, `export md`, and `today`.
+- The `today` action appends a dated `h2` section if today's entry is missing, or jumps to today's section if it already exists.
 - The right sidebar groups dated entries by month and lets the user jump to a day.
 - The empty state keeps a recent-files list so the last journal can be reopened quickly.
 - HTML is written back to disk directly, which keeps the saved journal closer to what publishing tools expect than a Markdown-first workflow.
@@ -45,8 +44,6 @@ Evidence from the current code:
   TipTap wrapper that handles editor syncing, pair wrapping, em dash insertion, and typewriter-centering behavior.
 - [`src/components/EditorToolbar.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/EditorToolbar.tsx)
   Inline formatting controls for headings and common rich-text marks.
-- [`src/components/LeftIdeasPanel.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/LeftIdeasPanel.tsx)
-  Collapsible ideas panel built from word-frequency data.
 - [`src/components/RightLibraryPanel.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/RightLibraryPanel.tsx)
   Collapsible month library used for jumping to dated entries.
 
@@ -59,7 +56,7 @@ Evidence from the current code:
 - [`src/lib/dates.ts`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/lib/dates.ts)
   Formats journal heading dates and parses both current and older heading styles.
 - [`src/lib/wordCount.ts`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/lib/wordCount.ts)
-  Counts words and builds the recurring-ideas frequency list.
+  Counts words for the running day and year totals shown in the toolbar.
 - [`src/lib/typewriter.ts`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/lib/typewriter.ts)
   Keeps the caret centered when typewriter mode is active.
 
@@ -114,13 +111,15 @@ Evidence from the current code:
   [`src/components/Editor.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/Editor.tsx),
   [`src/components/EditorToolbar.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/EditorToolbar.tsx)
 - Sidebar layout or density:
-  [`src/components/LeftIdeasPanel.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/LeftIdeasPanel.tsx),
   [`src/components/RightLibraryPanel.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/RightLibraryPanel.tsx),
   [`src/styles/globals.css`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/styles/globals.css)
 - Native file access or macOS text-assistance behavior:
   [`src-tauri/src/lib.rs`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src-tauri/src/lib.rs),
   [`src-tauri/capabilities/default.json`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src-tauri/capabilities/default.json),
   [`src-tauri/tauri.conf.json`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src-tauri/tauri.conf.json)
+- App icon assets:
+  [`src-tauri/icons`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src-tauri/icons),
+  [`icon.png`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/icon.png)
 
 ## Practical Notes
 

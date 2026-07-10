@@ -50,7 +50,7 @@ export default function Toolbar({
         )}
         {fileOpen && (
           <button className="toolbar-btn toolbar-btn-primary" onClick={onNewDay}>
-            new day
+            today
           </button>
         )}
       </div>

@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useEditor, EditorContent, Editor as TiptapEditor } from '@tiptap/react'
 import { Extension, InputRule } from '@tiptap/core'
+import { DOMSerializer } from '@tiptap/pm/model'
 import { TextSelection } from '@tiptap/pm/state'
+import { EditorView } from '@tiptap/pm/view'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import EditorToolbar from './EditorToolbar'
@@ -63,6 +65,101 @@ function isoDate(date: Date): string {
   const m = String(date.getMonth() + 1).padStart(2, '0')
   const d = String(date.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
+}
+
+function collapseClipboardWhitespace(value: string): string {
+  return value.replace(/\s+/g, ' ').trim()
+}
+
+function flattenParagraphsInsideListItems(container: HTMLElement) {
+  container.querySelectorAll('li > p').forEach((paragraph) => {
+    const listItem = paragraph.parentElement
+    if (!listItem) return
+
+    // Some receiving apps add paragraph margins inside every list item. Moving
+    // the paragraph contents directly into the <li> keeps copied lists compact.
+    while (paragraph.firstChild) {
+      listItem.insertBefore(paragraph.firstChild, paragraph)
+    }
+
+    paragraph.remove()
+  })
+}
+
+function stripEditorOnlyAttributes(container: HTMLElement) {
+  container.querySelectorAll('*').forEach((element) => {
+    Array.from(element.attributes).forEach((attribute) => {
+      if (element.tagName.toLowerCase() === 'a' && attribute.name === 'href') return
+      element.removeAttribute(attribute.name)
+    })
+  })
+}
+
+function getListItemText(listItem: HTMLElement, prefix: string, depth: number): string {
+  const clone = listItem.cloneNode(true) as HTMLElement
+  clone.querySelectorAll('ul, ol').forEach((nestedList) => nestedList.remove())
+
+  const text = collapseClipboardWhitespace(clone.textContent ?? '')
+  const nestedLists = Array.from(listItem.children).filter(
+    (child): child is HTMLElement => child.tagName === 'UL' || child.tagName === 'OL',
+  )
+  const nestedText = nestedLists
+    .map((list) => getListText(list, depth + 1))
+    .filter(Boolean)
+    .join('\n')
+
+  const line = `${'  '.repeat(depth)}${prefix}${text}`.trimEnd()
+  return nestedText ? `${line}\n${nestedText}` : line
+}
+
+function getListText(list: HTMLElement, depth = 0): string {
+  const isOrdered = list.tagName === 'OL'
+  const start = Number(list.getAttribute('start') ?? '1') || 1
+
+  return Array.from(list.children)
+    .filter((child): child is HTMLElement => child.tagName === 'LI')
+    .map((listItem, index) => {
+      const prefix = isOrdered ? `${start + index}. ` : '- '
+      return getListItemText(listItem, prefix, depth)
+    })
+    .join('\n')
+}
+
+function getCleanPlainTextFromHtml(html: string): string {
+  const container = document.createElement('div')
+  container.innerHTML = html
+
+  return Array.from(container.children)
+    .map((child) => {
+      if (!(child instanceof HTMLElement)) return ''
+      if (child.tagName === 'UL' || child.tagName === 'OL') return getListText(child)
+      if (child.tagName === 'HR') return '---'
+      return collapseClipboardWhitespace(child.textContent ?? '')
+    })
+    .filter(Boolean)
+    .join('\n\n')
+}
+
+function writeCleanSelectionToClipboard(view: EditorView, event: ClipboardEvent): boolean {
+  if (!event.clipboardData || view.state.selection.empty) return false
+
+  const selection = view.state.selection.content()
+  const fragment = DOMSerializer
+    .fromSchema(view.state.schema)
+    .serializeFragment(selection.content)
+  const container = document.createElement('div')
+  container.appendChild(fragment)
+
+  flattenParagraphsInsideListItems(container)
+  stripEditorOnlyAttributes(container)
+
+  const cleanHtml = container.innerHTML
+  const cleanPlainText = getCleanPlainTextFromHtml(cleanHtml)
+
+  event.clipboardData.setData('text/html', cleanHtml)
+  event.clipboardData.setData('text/plain', cleanPlainText)
+  event.preventDefault()
+  return true
 }
 
 export default function Editor({
@@ -213,6 +310,9 @@ export default function Editor({
         }
 
         return false
+      },
+      handleDOMEvents: {
+        copy: (view, event) => writeCleanSelectionToClipboard(view, event),
       },
     },
     content: value,
