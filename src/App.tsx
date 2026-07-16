@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useDeferredValue } from 'react'
 import Toolbar from './components/Toolbar'
 import Editor, { EditorBridge } from './components/Editor'
+import FocusView from './components/FocusView'
 import RightLibraryPanel from './components/RightLibraryPanel'
 import {
   exportMarkdownFile,
@@ -15,22 +16,31 @@ import {
   hasEntryForDate,
   appendDateHeading,
   getCurrentDaySection,
+  getYearEntryText,
+  getEntryBodyHtml,
+  replaceEntryBodyHtml,
   extractEntries,
   groupEntriesByMonth,
-  getPlainTextFromHtml,
 } from './lib/journal'
 import { countWords } from './lib/wordCount'
 import { MonthGroup } from './lib/journal'
 
 type SaveState = 'saved' | 'saving' | 'unsaved'
-type Theme = 'day' | 'night'
+type Theme = 'day' | 'night' | 'nautical'
 
 const AUTOSAVE_DELAY = 800
 const RECENT_FILES_KEY = 'journal-recent-files'
 const MAX_RECENT_FILES = 8
 
 function getInitialTheme(): Theme {
-  return (localStorage.getItem('journal-theme') as Theme) ?? 'day'
+  const savedTheme = localStorage.getItem('journal-theme')
+
+  // A saved preference can outlive a later app update. Only reuse recognised
+  // theme names so an old or manually edited setting cannot leave the app
+  // without matching colours.
+  if (savedTheme === 'night' || savedTheme === 'nautical') return savedTheme
+
+  return 'day'
 }
 
 function getInitialSaveLightSetting(): boolean {
@@ -86,6 +96,8 @@ export default function App() {
   const [todayWords, setTodayWords] = useState(0)
   const [totalWords, setTotalWords] = useState(0)
   const [scrollToDate, setScrollToDate] = useState<Date | null>(null)
+  const [activeEntryDate, setActiveEntryDate] = useState<Date | null>(null)
+  const [focusDate, setFocusDate] = useState<Date | null>(null)
 
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const htmlRef = useRef(html)
@@ -102,6 +114,16 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('journal-theme', theme)
   }, [theme])
+
+  function cycleTheme() {
+    // Keep all three appearances one click apart: the neutral modes remain
+    // quick to reach, while Nautical is an optional focused writing setting.
+    setTheme((current) => {
+      if (current === 'day') return 'night'
+      if (current === 'night') return 'nautical'
+      return 'day'
+    })
+  }
 
   useEffect(() => {
     localStorage.setItem('journal-save-light', showSaveLight ? 'on' : 'off')
@@ -131,14 +153,16 @@ export default function App() {
   useEffect(() => {
     const today = new Date()
     const entries = extractEntries(deferredHtml)
-    const fullText = getPlainTextFromHtml(deferredHtml)
 
     setTodayWords(countWords(getCurrentDaySection(deferredHtml, today)))
-    setTotalWords(countWords(fullText))
+    setTotalWords(countWords(getYearEntryText(deferredHtml, today.getFullYear())))
     setMonthGroups(groupEntriesByMonth(entries))
   }, [deferredHtml])
 
   const handleChange = useCallback((value: string) => {
+    // Update the ref straight away as well as React state. The focus panel can
+    // produce several quick edits before React has finished re-rendering.
+    htmlRef.current = value
     setHtml(value)
     setSaveState('unsaved')
 
@@ -186,15 +210,33 @@ export default function App() {
     rememberRecentFile(targetPath)
   }, [])
 
+  const openFocusForDate = useCallback((date: Date) => {
+    const latestHtml = getLatestHtml()
+
+    // Keep the rendered document aligned with a just-flushed background editor
+    // before extracting this entry for the separate focus editor.
+    htmlRef.current = latestHtml
+    setHtml(latestHtml)
+
+    setActiveEntryDate(date)
+    setFocusDate(date)
+  }, [])
+
   const handleNewDay = useCallback(() => {
     const today = new Date()
     const latestHtml = getLatestHtml()
 
+    // Today remains the fast navigation action: create a missing section, then
+    // bring the full journal editor down to that entry rather than opening focus.
     if (!hasEntryForDate(latestHtml, today)) {
-      const updated = appendDateHeading(latestHtml, today)
-      handleChange(updated)
+      handleChange(appendDateHeading(latestHtml, today))
+    } else {
+      htmlRef.current = latestHtml
+      setHtml(latestHtml)
     }
-    requestAnimationFrame(() => setScrollToDate(new Date()))
+
+    setActiveEntryDate(today)
+    requestAnimationFrame(() => setScrollToDate(today))
   }, [handleChange])
 
   const handleExportMarkdown = useCallback(async () => {
@@ -203,9 +245,24 @@ export default function App() {
 
   const handleJumpToDate = useCallback((date: Date) => {
     setScrollToDate(date)
+    setActiveEntryDate(date)
   }, [])
 
   const handleScrollToDateDone = useCallback(() => setScrollToDate(null), [])
+
+  const handleActiveEntryDateChange = useCallback((date: Date | null) => {
+    setActiveEntryDate((currentDate) => {
+      if (currentDate?.getTime() === date?.getTime()) return currentDate
+      return date
+    })
+  }, [])
+
+  const handleFocusChange = useCallback((entryHtml: string) => {
+    if (!focusDate) return
+
+    const nextDocument = replaceEntryBodyHtml(htmlRef.current, focusDate, entryHtml)
+    handleChange(nextDocument)
+  }, [focusDate, handleChange])
 
   // Cmd+S save
   useEffect(() => {
@@ -226,6 +283,10 @@ export default function App() {
     <div className="app">
       <Toolbar
         onNewDay={handleNewDay}
+        onFocusCurrent={() => {
+          if (activeEntryDate) openFocusForDate(activeEntryDate)
+        }}
+        focusAvailable={activeEntryDate !== null}
         onNewFile={handleNewFile}
         onOpenFile={handleOpenFile}
         onExportMarkdown={handleExportMarkdown}
@@ -237,7 +298,7 @@ export default function App() {
         showSaveLight={showSaveLight}
         onToggleSaveLight={() => setShowSaveLight(value => !value)}
         theme={theme}
-        onToggleTheme={() => setTheme(t => t === 'day' ? 'night' : 'day')}
+        onCycleTheme={cycleTheme}
         fileOpen={fileOpen}
       />
       <div className="layout">
@@ -248,6 +309,7 @@ export default function App() {
             typewriterMode={typewriterMode}
             scrollToDate={scrollToDate}
             onScrollToDateDone={handleScrollToDateDone}
+            onActiveEntryDateChange={handleActiveEntryDateChange}
             onBridgeReady={(bridge) => {
               editorBridgeRef.current = bridge
             }}
@@ -290,6 +352,14 @@ export default function App() {
         )}
         <RightLibraryPanel groups={monthGroups} onJumpToDate={handleJumpToDate} />
       </div>
+      {focusDate && (
+        <FocusView
+          date={focusDate}
+          value={getEntryBodyHtml(html, focusDate)}
+          onChange={handleFocusChange}
+          onClose={() => setFocusDate(null)}
+        />
+      )}
     </div>
   )
 }

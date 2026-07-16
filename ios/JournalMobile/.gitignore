@@ -1,0 +1,5 @@
+# Personal Xcode interface state and generated dependency folders.
+xcuserdata/
+*.xcuserstate
+Pods/
+DerivedData/

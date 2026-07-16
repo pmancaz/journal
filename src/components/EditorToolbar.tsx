@@ -16,6 +16,7 @@ export default function EditorToolbar({ editor }: Props) {
         onClick()
       }}
       title={title}
+      aria-pressed={active}
     >
       {label}
     </button>

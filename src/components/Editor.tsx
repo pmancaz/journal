@@ -8,6 +8,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import EditorToolbar from './EditorToolbar'
 import { centreCursorInScroller } from '../lib/typewriter'
+import { parseHeadingDate } from '../lib/dates'
 
 type Props = {
   value: string
@@ -15,6 +16,9 @@ type Props = {
   typewriterMode: boolean
   scrollToDate: Date | null
   onScrollToDateDone: () => void
+  onActiveEntryDateChange?: (date: Date | null) => void
+  autoFocus?: boolean
+  variant?: 'standard' | 'focus'
   onBridgeReady?: (bridge: EditorBridge | null) => void
 }
 
@@ -65,6 +69,24 @@ function isoDate(date: Date): string {
   const m = String(date.getMonth() + 1).padStart(2, '0')
   const d = String(date.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
+}
+
+function getEntryDateAtCursor(editor: TiptapEditor): Date | null {
+  const cursorPosition = editor.state.selection.$from.pos
+  let activeDate: Date | null = null
+
+  // The nearest dated H2 before the caret owns the text currently being read
+  // or edited. Non-dated headings stay part of that same journal entry.
+  editor.state.doc.descendants((node, position) => {
+    if (position > cursorPosition) return false
+    if (node.type.name !== 'heading') return true
+
+    const date = parseHeadingDate(node.textContent)
+    if (date) activeDate = date
+    return true
+  })
+
+  return activeDate
 }
 
 function collapseClipboardWhitespace(value: string): string {
@@ -168,6 +190,9 @@ export default function Editor({
   typewriterMode,
   scrollToDate,
   onScrollToDateDone,
+  onActiveEntryDateChange,
+  autoFocus = false,
+  variant = 'standard',
   onBridgeReady,
 }: Props) {
   const lastValueRef = useRef(value)
@@ -332,6 +357,9 @@ export default function Editor({
     onBlur: ({ editor }) => {
       flushEditorSync(editor as TiptapEditor)
     },
+    onSelectionUpdate: ({ editor }) => {
+      onActiveEntryDateChange?.(getEntryDateAtCursor(editor as TiptapEditor))
+    },
   })
 
   useEffect(() => {
@@ -387,6 +415,15 @@ export default function Editor({
     }
   }, [value, editor])
 
+  useEffect(() => {
+    if (!editor || !autoFocus) return
+
+    // The focus panel appears over the main editor. Delaying one frame lets
+    // its opening animation begin before we move the typing caret into it.
+    const frame = requestAnimationFrame(() => editor.commands.focus('end'))
+    return () => cancelAnimationFrame(frame)
+  }, [editor, autoFocus])
+
   // Scroll to the end of today's section (or jumped-to date) so the cursor
   // is ready to type.  We pick the LAST heading matching the date, then walk
   // forward to the next heading / horizontal rule (or end of doc) and place
@@ -435,7 +472,7 @@ export default function Editor({
   }, [scrollToDate, editor, onScrollToDateDone])
 
   return (
-    <div className="editor-wrap">
+    <div className={`editor-wrap editor-${variant}`}>
       <EditorToolbar editor={editor} />
       <div
         ref={scrollerRef}

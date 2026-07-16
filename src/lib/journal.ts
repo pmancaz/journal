@@ -65,6 +65,102 @@ export function getCurrentDaySection(html: string, date: Date): string {
   return ''
 }
 
+export function getEntryBodyHtml(html: string, date: Date): string {
+  const doc = parseHtmlDocument(html)
+  const headings = getJournalHeadings(doc)
+
+  for (const heading of headings) {
+    const headingDate = parseHeadingDate(heading.textContent ?? '')
+    if (!headingDate || !isSameDay(headingDate, date)) continue
+
+    const sectionParts: string[] = []
+    let cursor = heading.nextElementSibling
+
+    // A dated H2 starts the following journal entry. Ordinary headings within
+    // an entry are kept, so a focused entry does not lose its own structure.
+    while (cursor) {
+      const nextHeadingDate = cursor.tagName === 'H2'
+        ? parseHeadingDate(cursor.textContent ?? '')
+        : null
+      if (nextHeadingDate) break
+
+      sectionParts.push(cursor.outerHTML)
+      cursor = cursor.nextElementSibling
+    }
+
+    return sectionParts.join('') || '<p></p>'
+  }
+
+  return '<p></p>'
+}
+
+export function replaceEntryBodyHtml(html: string, date: Date, entryHtml: string): string {
+  const doc = parseHtmlDocument(html)
+  const targetHeading = getJournalHeadings(doc).find((heading) => {
+    const headingDate = parseHeadingDate(heading.textContent ?? '')
+    return headingDate !== null && isSameDay(headingDate, date)
+  })
+
+  // If a date was removed in another view while the focus panel was open,
+  // leave the full document alone rather than inserting content in the wrong place.
+  if (!targetHeading) return html
+
+  let cursor = targetHeading.nextElementSibling
+  while (cursor) {
+    const nextHeadingDate = cursor.tagName === 'H2'
+      ? parseHeadingDate(cursor.textContent ?? '')
+      : null
+    if (nextHeadingDate) break
+
+    const nextCursor = cursor.nextElementSibling
+    cursor.remove()
+    cursor = nextCursor
+  }
+
+  const entryDocument = parseHtmlDocument(entryHtml)
+  const replacement = doc.createDocumentFragment()
+  Array.from(entryDocument.body.childNodes).forEach((node) => {
+    replacement.appendChild(doc.importNode(node, true))
+  })
+
+  // TipTap normally supplies a paragraph for an empty editor. Keep that same
+  // ready-to-type line if a custom edit ever supplies an entirely empty value.
+  if (!replacement.childNodes.length) {
+    replacement.appendChild(doc.createElement('p')).appendChild(doc.createElement('br'))
+  }
+
+  targetHeading.after(replacement)
+  return doc.body.innerHTML
+}
+
+export function getYearEntryText(html: string, year: number): string {
+  const doc = parseHtmlDocument(html)
+  const headings = getJournalHeadings(doc)
+  const yearParts: string[] = []
+
+  for (const heading of headings) {
+    const entryDate = parseHeadingDate(heading.textContent ?? '')
+    if (!entryDate || entryDate.getFullYear() !== year) continue
+
+    // An entry can contain its own ordinary headings. Keep reading until the
+    // next *dated* heading so those headings and their text remain part of
+    // the entry's word count.
+    let cursor = heading.nextElementSibling
+    while (cursor) {
+      const nextHeadingDate = cursor.tagName === 'H2'
+        ? parseHeadingDate(cursor.textContent ?? '')
+        : null
+      if (nextHeadingDate) break
+
+      const text = cursor.textContent?.trim()
+      if (text) yearParts.push(text)
+      cursor = cursor.nextElementSibling
+    }
+  }
+
+  return yearParts.join(' ')
+}
+
 export function extractEntries(html: string): JournalEntry[] {
   const doc = parseHtmlDocument(html)
   const entries: JournalEntry[] = []

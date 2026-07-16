@@ -37,6 +37,17 @@ export function parseHeadingDate(heading: string): Date | null {
     return new Date(year, month, d)
   }
 
+  // Some older entries use a compact date such as "260417 - Friday". Treat
+  // the leading two digits as a 2000s year so those entries remain visible in
+  // the library and contribute to their correct year's word total.
+  const compactIso = heading.match(/^(\d{2})(\d{2})(\d{2})\b/)
+  if (compactIso) {
+    const year = 2000 + parseInt(compactIso[1], 10)
+    const month = parseInt(compactIso[2], 10) - 1
+    const d = parseInt(compactIso[3], 10)
+    return new Date(year, month, d)
+  }
+
   const iso = heading.match(/^##\s+\*?(\d{4})-(\d{2})-(\d{2})\*?/)
   if (iso) {
     const year = parseInt(iso[1], 10)

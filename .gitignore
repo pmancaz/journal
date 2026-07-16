@@ -6,6 +6,10 @@ node_modules/
 dist/
 src-tauri/target/
 
+# Tauri's optional mobile scaffold is generated locally. The maintained iOS
+# companion lives in ios/JournalMobile instead.
+src-tauri/gen/
+
 # Local assistant/tooling folders
 .claude/
 

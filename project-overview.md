@@ -9,11 +9,24 @@
 This looks like a lightweight daily journal for writing into one long file while still keeping navigation and review simple.
 
 Evidence from the current code:
-- The toolbar centers on `new file`, `open file`, `export md`, and `today`.
-- The `today` action appends a dated `h2` section if today's entry is missing, or jumps to today's section if it already exists.
-- The right sidebar groups dated entries by month and lets the user jump to a day.
+- The toolbar centers on `new file`, `open file`, `export md`, `today`, and `focus`.
+- The `today` action appends a dated `h2` section if today's entry is missing, then takes the full editor to it. The `focus` action opens the dated entry at the current caret position or a date selected from the library.
+- The right sidebar groups dated entries by month and lets the user jump to a day, either from the visible list or its year/month/date chooser.
 - The empty state keeps a recent-files list so the last journal can be reopened quickly.
 - HTML is written back to disk directly, which keeps the saved journal closer to what publishing tools expect than a Markdown-first workflow.
+
+## Design System Baseline
+
+The journal follows the shared Pat Carroll desktop-app visual system in
+[`PC_Design System.md`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/Design/PC_Design%20System.md).
+
+- IBM Plex Mono is the sole interface typeface, with compact lowercase actions and uppercase structural labels.
+- Day and night mode use shared neutral tokens. Nautical is an optional third appearance: cyan forms a quiet technical frame while orange marks focused actions and active editing states.
+- The interface uses thin one-pixel rules, square controls, restrained hover states, and a 48px top bar rather than rounded cards or shadows.
+- The main editor has a full-height, solid reading column with faint vertical boundary rules. In Nautical this intentionally masks the grid behind text while leaving it visible in the surrounding workspace.
+- The library header includes the system's small calibration mark. In Nautical it uses cyan; keep that detail limited to major framed areas so it remains distinctive.
+- Accessibility details include dashed keyboard focus, pressed states for toggles, and reduced-motion handling.
+- The current journal icon deliberately remains separate from the blue-accent system: it was recently refreshed around the app's black, white, and green book motif and should not be replaced without a specific icon request.
 
 ## Main Technologies
 
@@ -24,6 +37,23 @@ Evidence from the current code:
 - TipTap editor
 - `turndown` for HTML-to-Markdown export
 - Tauri dialog and filesystem plugins for local file open/save
+- Native SwiftUI, UIKit document picker, and WebKit for the iPhone/iPad companion
+
+## iPhone and iPad Companion
+
+[`ios/JournalMobile`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/ios/JournalMobile)
+is a separate native iOS project. It is intentionally not a second journal
+database: it opens the same user-selected HTML file from iCloud Drive and saves
+back to that file in place.
+
+- The Files picker grants access to the iCloud Drive document, and the app saves
+  a bookmark so the same file can be reopened later.
+- `NSFileCoordinator` and `NSFilePresenter` coordinate external file access and
+  detect updates arriving from another device.
+- The mobile app refuses to silently overwrite a changed remote file when it
+  has local unsaved typing. It offers a reload or a protected local conflict copy.
+- The iOS project is generated from `ios/JournalMobile/project.yml` with
+  XcodeGen and supports both iPhone and iPad.
 
 ## Repository Layout
 
@@ -42,6 +72,8 @@ Evidence from the current code:
   Top-level controls and status indicators.
 - [`src/components/Editor.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/Editor.tsx)
   TipTap wrapper that handles editor syncing, pair wrapping, em dash insertion, and typewriter-centering behavior.
+- [`src/components/FocusView.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/FocusView.tsx)
+  Portrait focus overlay for editing one selected journal entry body while retaining the same autosave flow.
 - [`src/components/EditorToolbar.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/EditorToolbar.tsx)
   Inline formatting controls for headings and common rich-text marks.
 - [`src/components/RightLibraryPanel.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/RightLibraryPanel.tsx)
@@ -56,7 +88,7 @@ Evidence from the current code:
 - [`src/lib/dates.ts`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/lib/dates.ts)
   Formats journal heading dates and parses both current and older heading styles.
 - [`src/lib/wordCount.ts`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/lib/wordCount.ts)
-  Counts words for the running day and year totals shown in the toolbar.
+  Counts words for the running day and year totals shown in the toolbar. `journal.ts` scopes the year total to dated entries from the current calendar year.
 - [`src/lib/typewriter.ts`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/lib/typewriter.ts)
   Keeps the caret centered when typewriter mode is active.
 
@@ -70,6 +102,15 @@ Evidence from the current code:
   Minimal native entry point that hands control to `app_lib::run()`.
 - [`src-tauri/capabilities/default.json`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src-tauri/capabilities/default.json)
   Permissions granted to the desktop app.
+
+### iOS companion
+
+- [`ios/JournalMobile/JournalMobile.xcodeproj`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/ios/JournalMobile/JournalMobile.xcodeproj)
+  Native Xcode project used to install the journal on iPhone and iPad.
+- [`ios/JournalMobile/JournalMobile/JournalDocumentStore.swift`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/ios/JournalMobile/JournalMobile/JournalDocumentStore.swift)
+  Owns the selected iCloud Drive file, bookmark, autosave, and conflict safety.
+- [`ios/JournalMobile/JournalMobile/JournalWebEditor.swift`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/ios/JournalMobile/JournalMobile/JournalWebEditor.swift)
+  Lightweight HTML editor that works with the same body content saved by the desktop app.
 
 ### Local content and helpers
 
@@ -98,6 +139,8 @@ Evidence from the current code:
 - Save actions and `new day` both ask the editor for the freshest content before writing.
 - The journal parser still accepts older heading formats from earlier versions of the app.
 - The current HTML journal can contain both dated and non-dated headings, so downstream tools should only treat parseable dates as journal entries.
+- The toolbar's year total counts text within dated entries from the current calendar year, rather than all content in a multi-year document.
+- Focus View is a portrait overlay for writing one dated entry at a time. It includes an entry word count and its own typewriter mode, edits only that entry body, immediately merges the change back into the full HTML journal, and uses the normal autosave path.
 
 ## Likely Places To Edit
 
@@ -113,10 +156,16 @@ Evidence from the current code:
 - Sidebar layout or density:
   [`src/components/RightLibraryPanel.tsx`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/components/RightLibraryPanel.tsx),
   [`src/styles/globals.css`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/styles/globals.css)
+- Shared visual language:
+  [`src/styles/globals.css`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src/styles/globals.css),
+  [`PC_Design System.md`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/Design/PC_Design%20System.md)
 - Native file access or macOS text-assistance behavior:
   [`src-tauri/src/lib.rs`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src-tauri/src/lib.rs),
   [`src-tauri/capabilities/default.json`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src-tauri/capabilities/default.json),
   [`src-tauri/tauri.conf.json`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src-tauri/tauri.conf.json)
+- iCloud Drive file access or mobile sync safety:
+  [`ios/JournalMobile/JournalMobile/JournalDocumentStore.swift`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/ios/JournalMobile/JournalMobile/JournalDocumentStore.swift),
+  [`ios/JournalMobile/JournalMobile/JournalFilePresenter.swift`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/ios/JournalMobile/JournalMobile/JournalFilePresenter.swift)
 - App icon assets:
   [`src-tauri/icons`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/src-tauri/icons),
   [`icon.png`](/Users/patrickcarroll/Dropbox/Creative%20Projects/Programs/pc_journal/icon.png)

@@ -2,6 +2,8 @@ type SaveState = 'saved' | 'saving' | 'unsaved'
 
 type Props = {
   onNewDay: () => void
+  onFocusCurrent: () => void
+  focusAvailable: boolean
   onNewFile: () => void
   onOpenFile: () => void
   onExportMarkdown: () => void
@@ -12,13 +14,15 @@ type Props = {
   onToggleTypewriter: () => void
   showSaveLight: boolean
   onToggleSaveLight: () => void
-  theme: 'day' | 'night'
-  onToggleTheme: () => void
+  theme: 'day' | 'night' | 'nautical'
+  onCycleTheme: () => void
   fileOpen: boolean
 }
 
 export default function Toolbar({
   onNewDay,
+  onFocusCurrent,
+  focusAvailable,
   onNewFile,
   onOpenFile,
   onExportMarkdown,
@@ -30,7 +34,7 @@ export default function Toolbar({
   showSaveLight,
   onToggleSaveLight,
   theme,
-  onToggleTheme,
+  onCycleTheme,
   fileOpen,
 }: Props) {
   return (
@@ -53,6 +57,16 @@ export default function Toolbar({
             today
           </button>
         )}
+        {fileOpen && (
+          <button
+            className="toolbar-btn"
+            onClick={onFocusCurrent}
+            disabled={!focusAvailable}
+            title={focusAvailable ? 'focus the selected entry' : 'choose an entry from the library first'}
+          >
+            focus
+          </button>
+        )}
       </div>
 
       <div className="toolbar-right">
@@ -71,6 +85,8 @@ export default function Toolbar({
             <button
               className={`toolbar-btn ${typewriterMode ? 'toolbar-btn-active' : ''}`}
               onClick={onToggleTypewriter}
+              aria-pressed={typewriterMode}
+              title="toggle typewriter mode"
             >
               typewriter
             </button>
@@ -95,12 +111,16 @@ export default function Toolbar({
         <button
           className={`toolbar-btn ${showSaveLight ? 'toolbar-btn-active' : ''}`}
           onClick={onToggleSaveLight}
+          aria-pressed={showSaveLight}
+          title="toggle save light"
         >
           save light
         </button>
         <span className="toolbar-sep">·</span>
-        <button className="toolbar-btn" onClick={onToggleTheme}>
-          {theme === 'day' ? '[ ○ day ]' : '[ ● night ]'}
+        <button className="toolbar-btn" onClick={onCycleTheme} title="change appearance">
+          {theme === 'day' && '[ ○ day ]'}
+          {theme === 'night' && '[ ● night ]'}
+          {theme === 'nautical' && '[ ◈ nautical ]'}
         </button>
       </div>
     </header>
