@@ -1,13 +1,25 @@
 # Local macOS clutter
 .DS_Store
+work/
+.publication/
+*.app/
+.venv/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
 
 # Dependency and build output folders
 node_modules/
+native-web/
+__pycache__/
+*.pyc
 dist/
+build/
 src-tauri/target/
 
-# Tauri's optional mobile scaffold is generated locally. The maintained iOS
-# companion lives in ios/JournalMobile instead.
+# Tauri-generated platform scaffolding is local build output.
 src-tauri/gen/
 
 # Local assistant/tooling folders
@@ -16,6 +28,17 @@ src-tauri/gen/
 # Private writing content
 journal/
 core_questions/
+journalHTML*.html
+*journal*backup*.html
+preview-draft.html
+backup-path.txt
+journal-id.txt
+Timeline/
+TimelineRuntime/
+TimelineModels/
+*.sqlite
+*.sqlite-*
+*.safetensors
 
 # Generated icon backups that do not need to live in the repo
 src-tauri/icons/*.backup

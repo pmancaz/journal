@@ -26,7 +26,17 @@ export function formatMonthLabel(date: Date): string {
   return `${MONTHS[date.getMonth()]} ${date.getFullYear()}`
 }
 
+// Date's constructor rolls invalid calendar days into the following month and
+// treats 0..99 as 1900..1999. Imported headings must identify their literal day.
+function calendarDate(year: number, month: number, day: number): Date | null {
+  const result = new Date(0)
+  result.setFullYear(year, month, day)
+  result.setHours(0, 0, 0, 0)
+  return result.getFullYear() === year && result.getMonth() === month && result.getDate() === day ? result : null
+}
+
 export function parseHeadingDate(heading: string): Date | null {
+  heading = heading.trim()
   // Matches current rich-text headings like "2026-05-12 Monday"
   // and older markdown-style headings from earlier versions of the app.
   const plainIso = heading.match(/^(\d{4})-(\d{2})-(\d{2})\b/)
@@ -34,7 +44,7 @@ export function parseHeadingDate(heading: string): Date | null {
     const year = parseInt(plainIso[1], 10)
     const month = parseInt(plainIso[2], 10) - 1
     const d = parseInt(plainIso[3], 10)
-    return new Date(year, month, d)
+    return calendarDate(year, month, d)
   }
 
   // Some older entries use a compact date such as "260417 - Friday". Treat
@@ -45,7 +55,7 @@ export function parseHeadingDate(heading: string): Date | null {
     const year = 2000 + parseInt(compactIso[1], 10)
     const month = parseInt(compactIso[2], 10) - 1
     const d = parseInt(compactIso[3], 10)
-    return new Date(year, month, d)
+    return calendarDate(year, month, d)
   }
 
   const iso = heading.match(/^##\s+\*?(\d{4})-(\d{2})-(\d{2})\*?/)
@@ -53,7 +63,7 @@ export function parseHeadingDate(heading: string): Date | null {
     const year = parseInt(iso[1], 10)
     const month = parseInt(iso[2], 10) - 1
     const d = parseInt(iso[3], 10)
-    return new Date(year, month, d)
+    return calendarDate(year, month, d)
   }
   const legacy = heading.match(/^##\s+\w+\s+(\d{1,2})\s+(\w+)\s+(\d{4})/)
   if (legacy) {
@@ -61,7 +71,7 @@ export function parseHeadingDate(heading: string): Date | null {
     const monthIndex = MONTHS.findIndex(m => m === legacy[2])
     const year = parseInt(legacy[3], 10)
     if (monthIndex === -1) return null
-    return new Date(year, monthIndex, d)
+    return calendarDate(year, monthIndex, d)
   }
   return null
 }

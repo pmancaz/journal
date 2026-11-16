@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 type SaveState = 'saved' | 'saving' | 'unsaved'
 
 type Props = {
@@ -6,14 +8,14 @@ type Props = {
   focusAvailable: boolean
   onNewFile: () => void
   onOpenFile: () => void
-  onExportMarkdown: () => void
+  protectedDraft: boolean
+  onReloadFile: () => void
+  fileActionPending: boolean
   saveState: SaveState
   todayWords: number
   totalWords: number
   typewriterMode: boolean
   onToggleTypewriter: () => void
-  showSaveLight: boolean
-  onToggleSaveLight: () => void
   theme: 'day' | 'night' | 'nautical'
   onCycleTheme: () => void
   fileOpen: boolean
@@ -25,33 +27,76 @@ export default function Toolbar({
   focusAvailable,
   onNewFile,
   onOpenFile,
-  onExportMarkdown,
+  protectedDraft,
+  onReloadFile,
+  fileActionPending,
   saveState,
   todayWords,
   totalWords,
   typewriterMode,
   onToggleTypewriter,
-  showSaveLight,
-  onToggleSaveLight,
   theme,
   onCycleTheme,
   fileOpen,
 }: Props) {
+  const fileMenuRef = useRef<HTMLDetailsElement>(null)
+
+  function runFileAction(action: () => void) {
+    if (fileMenuRef.current) fileMenuRef.current.open = false
+    action()
+  }
+
+  useEffect(() => {
+    // Native details/summary supplies keyboard opening. Outside clicks and
+    // Escape dismiss the small file menu without changing the journal.
+    function dismissOutside(event: PointerEvent) {
+      if (event.target instanceof Node && !fileMenuRef.current?.contains(event.target)
+        && fileMenuRef.current) fileMenuRef.current.open = false
+    }
+    function dismissWithEscape(event: KeyboardEvent) {
+      if (event.key !== 'Escape' || !fileMenuRef.current?.open) return
+      event.preventDefault()
+      fileMenuRef.current.open = false
+      fileMenuRef.current.querySelector('summary')?.focus()
+    }
+    document.addEventListener('pointerdown', dismissOutside)
+    document.addEventListener('keydown', dismissWithEscape)
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside)
+      document.removeEventListener('keydown', dismissWithEscape)
+    }
+  }, [])
+
+  const saveLabel = saveState === 'saved' ? 'saved' : saveState === 'saving' ? 'saving' : 'unsaved changes'
+
   return (
     <header className="toolbar">
       <div className="toolbar-left">
-        <span className="toolbar-app-name">journal</span>
-        <button className="toolbar-btn" onClick={onNewFile}>
-          new file
-        </button>
-        <button className="toolbar-btn" onClick={onOpenFile}>
-          open file
-        </button>
-        {fileOpen && (
-          <button className="toolbar-btn" onClick={onExportMarkdown}>
-            export md
-          </button>
-        )}
+        <span className="toolbar-app-name">Journal</span>
+        <details className="toolbar-file-menu" ref={fileMenuRef}>
+          <summary className="toolbar-btn" aria-disabled={fileActionPending}
+            onClick={event => { if (fileActionPending) event.preventDefault() }}>
+            file <span aria-hidden="true">⌄</span>
+          </summary>
+          <div className="toolbar-file-options">
+            <button className="toolbar-btn" onClick={() => runFileAction(onNewFile)} disabled={fileActionPending}>
+              new file
+            </button>
+            <button className="toolbar-btn" onClick={() => runFileAction(onOpenFile)} disabled={fileActionPending}>
+              open file
+            </button>
+            {fileOpen && protectedDraft && (
+              <button className="toolbar-btn" onClick={() => runFileAction(onReloadFile)} disabled={fileActionPending}>
+                reload journal
+              </button>
+            )}
+          </div>
+        </details>
+      </div>
+
+      {/* Equal outside columns keep these everyday actions at the actual
+          centre of the window, regardless of the word-count length. */}
+      <div className="toolbar-center">
         {fileOpen && (
           <button className="toolbar-btn toolbar-btn-primary" onClick={onNewDay}>
             today
@@ -72,6 +117,7 @@ export default function Toolbar({
       <div className="toolbar-right">
         {fileOpen && (
           <>
+            {protectedDraft && <span className="toolbar-protected-state">protected draft</span>}
             <span className="toolbar-wordcount">
               <span className="toolbar-label">today</span>
               <span className="toolbar-num">{todayWords.toLocaleString()}</span>
@@ -90,33 +136,16 @@ export default function Toolbar({
             >
               typewriter
             </button>
-            {showSaveLight && (
-              <>
-                <span className="toolbar-sep">·</span>
-                <span
-                  className={`toolbar-save-light toolbar-save-light-${saveState}`}
-                  title={
-                    saveState === 'saved'
-                      ? 'saved'
-                      : saveState === 'saving'
-                        ? 'saving'
-                        : 'unsaved changes'
-                  }
-                />
-              </>
-            )}
+            <span className="toolbar-sep">·</span>
+            <span
+              className={`toolbar-save-light toolbar-save-light-${saveState}`}
+              role="status"
+              aria-label={saveLabel}
+              title={saveLabel}
+            />
             <span className="toolbar-sep">·</span>
           </>
         )}
-        <button
-          className={`toolbar-btn ${showSaveLight ? 'toolbar-btn-active' : ''}`}
-          onClick={onToggleSaveLight}
-          aria-pressed={showSaveLight}
-          title="toggle save light"
-        >
-          save light
-        </button>
-        <span className="toolbar-sep">·</span>
         <button className="toolbar-btn" onClick={onCycleTheme} title="change appearance">
           {theme === 'day' && '[ ○ day ]'}
           {theme === 'night' && '[ ● night ]'}

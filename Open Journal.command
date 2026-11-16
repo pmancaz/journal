@@ -1,3 +1,3 @@
 #!/bin/bash
-cd "/Users/patrickcarroll/Dropbox/Creative Projects/Programs/pc_journal"
+cd "$(dirname "$0")"
 npm run tauri:dev

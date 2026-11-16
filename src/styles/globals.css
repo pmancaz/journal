@@ -1,56 +1,103 @@
-/* ─── tokens ─────────────────────────────────────────────────────────────── */
-:root {
-  --bg: #ffffff;
-  --bg-tint: #f2f2f2;
-  --fg: #0d0d0d;
-  --fg-muted: #888076;
-  --border:   rgba(13, 13, 13, 0.12);
-  --accent: #2f6fed;
-  --accent-strong: #174fc6;
-  --accent-soft: rgba(47, 111, 237, 0.12);
-  --selection-bg: rgba(47, 111, 237, 0.17);
-  --selection-fg: #0d0d0d;
-  --danger: #7d2929;
+/* ─── local typography and RAMA tokens ───────────────────────────────────── */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('../assets/IBMPlexMono-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 
-  --toolbar-h: 48px;
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('../assets/IBMPlexMono-SemiBold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  /* Day mode is drafting paper rather than bright browser white. */
+  --bg: #e8e1d3;
+  --bg-tint: #ddd5c6;
+  --fg: #202625;
+  --fg-muted: #716d65;
+  --border: rgba(32, 38, 37, 0.2);
+  --border-strong: rgba(18, 105, 111, 0.46);
+  --accent: #12696f;
+  --accent-strong: #08494d;
+  --accent-soft: rgba(18, 105, 111, 0.12);
+  --selection-bg: rgba(18, 105, 111, 0.19);
+  --selection-fg: #202625;
+  --danger: #933f2f;
+  --surface: rgba(235, 228, 214, 0.94);
+  --surface-solid: #e7dfd0;
+  --surface-quiet: rgba(220, 212, 197, 0.92);
+  --primary-text: #f5eee2;
+  --art-bg: #ded5c5;
+  --art-cyan: #187c82;
+  --art-copper: #a75d3d;
+  --art-pale: #343a38;
+  --art-quiet: #8c8579;
+
+  --toolbar-h: 42px;
   --sidebar-w: 200px;
   --font: 'IBM Plex Mono', 'Courier New', monospace;
 }
 
 [data-theme="night"] {
-  --bg: #080808;
-  --bg-tint: #101010;
-  --fg: #ffffff;
-  --fg-muted: #706a62;
-  --border:   rgba(245, 243, 239, 0.11);
-  --accent: #78a9ff;
-  --accent-strong: #a8c7ff;
-  --accent-soft: rgba(120, 169, 255, 0.14);
-  --selection-bg: rgba(120, 169, 255, 0.22);
-  --selection-fg: #f8fbff;
-  --danger: #d77a7a;
+  --bg: #17171f;
+  --bg-tint: #202029;
+  --fg: #e8e5dc;
+  --fg-muted: #8e8b85;
+  --border: rgba(216, 212, 200, 0.2);
+  --border-strong: rgba(98, 200, 216, 0.45);
+  --accent: #63cadb;
+  --accent-strong: #8fe8f0;
+  --accent-soft: rgba(99, 202, 219, 0.12);
+  --selection-bg: rgba(99, 202, 219, 0.2);
+  --selection-fg: #e8e5dc;
+  --danger: #e39268;
+  --surface: rgba(25, 25, 33, 0.94);
+  --surface-solid: #1c1c24;
+  --surface-quiet: rgba(31, 31, 40, 0.94);
+  --primary-text: #111118;
+  --art-bg: #17171f;
+  --art-cyan: #62c8d8;
+  --art-copper: #c58b5e;
+  --art-pale: #d8d4c8;
+  --art-quiet: #6f7077;
 }
 
 /* Nautical is the optional cyan-and-orange writing appearance. Cyan builds
    the quiet technical frame, while orange only calls attention to an action
    or an active editing state. */
 [data-theme="nautical"] {
-  --bg: #050607;
-  --bg-tint: #0a1011;
-  --panel-bg: #070b0c;
-  --chrome-bg: #05090a;
-  --fg: #f1f5ee;
-  --fg-muted: #9aa5a0;
-  --border: rgba(97, 215, 224, 0.18);
+  --bg: #061014;
+  --bg-tint: #0a1a20;
+  --panel-bg: #08161b;
+  --chrome-bg: #061014;
+  --fg: #d5f1ef;
+  --fg-muted: #759598;
+  --border: rgba(101, 220, 228, 0.2);
+  --border-strong: rgba(101, 220, 228, 0.52);
   --accent: #f47a4a;
-  --accent-strong: #ffac78;
+  --accent-strong: #ff9a6e;
   --accent-soft: rgba(244, 122, 74, 0.13);
   --selection-bg: rgba(244, 122, 74, 0.24);
-  --selection-fg: #fff7f0;
-  --danger: #ff5c4d;
+  --selection-fg: #d5f1ef;
+  --danger: #ff9a6e;
+  --surface: rgba(6, 16, 20, 0.94);
+  --surface-solid: #08161b;
+  --surface-quiet: rgba(8, 25, 30, 0.95);
+  --primary-text: #061014;
+  --art-bg: #061014;
   --instrument: #65dce4;
   --instrument-muted: #76c2c5;
-  --technical-border: rgba(101, 220, 228, 0.34);
+  --technical-border: rgba(101, 220, 228, 0.52);
+  --art-cyan: #65dce4;
+  --art-copper: #f47a4a;
+  --art-pale: #c6e5e3;
+  --art-quiet: #45676b;
 }
 
 /* ─── reset ──────────────────────────────────────────────────────────────── */
@@ -68,11 +115,12 @@ html, body, #root {
 body {
   font-family: var(--font);
   font-size: 13px;
-  line-height: 1.7;
-  background: var(--bg);
+  line-height: 1.45;
+  background: var(--art-bg);
   color: var(--fg);
   transition: background 180ms ease, color 180ms ease;
   overflow: hidden;
+  font-variant-numeric: tabular-nums;
 }
 
 ::selection {
@@ -103,35 +151,98 @@ button:focus-visible {
 
 /* ─── app shell ──────────────────────────────────────────────────────────── */
 .app {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
+  /* The frame deliberately reaches almost to the window edge. This is the
+     outer workspace margin, separate from the much calmer text margins. */
+  padding: 10px;
+  background: var(--art-bg);
+  overflow: hidden;
 }
 
-/* The grid stays deliberately faint, giving Nautical its spatial feel
-   without competing with the journal text. It never moves or animates. */
-[data-theme="nautical"] .app {
-  background-color: var(--bg);
+/* These fixed construction marks live only around the shell. They mimic
+   RAMA's restrained peripheral signal field without creating moving noise. */
+.rama-art-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-image:
-    radial-gradient(ellipse at 50% -15%, rgba(70, 215, 208, 0.09), transparent 44rem),
-    linear-gradient(rgba(101, 220, 228, 0.065) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(101, 220, 228, 0.065) 1px, transparent 1px),
-    linear-gradient(rgba(101, 220, 228, 0.023) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(101, 220, 228, 0.023) 1px, transparent 1px);
-  background-size: auto, 160px 160px, 160px 160px, 32px 32px, 32px 32px;
+    linear-gradient(106deg, transparent 49.9%, color-mix(in srgb, var(--art-cyan) 17%, transparent) 50%, transparent 50.1%),
+    repeating-linear-gradient(90deg, transparent 0 72px, color-mix(in srgb, var(--art-quiet) 34%, transparent) 72px 73px, transparent 73px 146px),
+    repeating-linear-gradient(0deg, transparent 0 96px, color-mix(in srgb, var(--art-quiet) 28%, transparent) 96px 97px, transparent 97px 192px);
+  opacity: 0.58;
+}
+
+/* The library and right ornaments share one width. This also leaves a gap
+   beside the narrow library tab when the drawer is closed. */
+.journal-shell.library-collapsed { --library-width: 30px; }
+.journal-shell.library-expanded { --library-width: var(--sidebar-w); }
+
+.journal-shell {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  /* The utility bar sits above the journal workspace. Without this explicit
+     column direction, a flex container defaults to a horizontal row and can
+     squeeze the editor into a thin strip. */
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid var(--border-strong);
+  outline: 1px solid color-mix(in srgb, var(--art-quiet) 42%, transparent);
+  outline-offset: 8px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface-solid) 95%, transparent);
+  box-shadow: 0 18px 54px color-mix(in srgb, var(--fg) 14%, transparent);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
+.journal-shell::before,
+.journal-shell::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  width: 78px;
+  height: 50px;
+  pointer-events: none;
+  opacity: 0.78;
+}
+
+.journal-shell::before {
+  /* Cyan completes the diagonal pair with the new top-left workspace mark. */
+  bottom: 10px;
+  right: calc(var(--library-width, 30px) + 12px);
+  border-right: 1px solid var(--art-cyan);
+  border-bottom: 4px solid var(--art-cyan);
+}
+
+.journal-shell::after {
+  bottom: 10px;
+  left: 12px;
+  border-bottom: 4px solid var(--art-copper);
+  border-left: 1px solid var(--art-copper);
 }
 
 /* ─── toolbar ────────────────────────────────────────────────────────────── */
 .toolbar {
+  position: relative;
+  z-index: 4;
   height: var(--toolbar-h);
   flex-shrink: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  padding: 0 18px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-strong);
+  background-color: var(--surface-solid);
+  /* A plain fill keeps the writing controls quiet in every theme. */
   gap: 18px;
 }
 
@@ -143,33 +254,72 @@ button:focus-visible {
 }
 
 .toolbar-left,
+.toolbar-center,
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   min-width: 0;
 }
 
+.toolbar-right { justify-self: end; }
+.toolbar-center { justify-self: center; }
+
 .toolbar-app-name {
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   color: var(--fg);
-  text-transform: lowercase;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
+.toolbar-file-menu { position: relative; }
+
+.toolbar-file-menu summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.toolbar-file-menu summary::-webkit-details-marker { display: none; }
+.toolbar-file-menu summary[aria-disabled="true"] { opacity: 0.38; cursor: not-allowed; }
+
+/* The menu floats below File so opening it never moves the writing surface. */
+.toolbar-file-options {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  min-width: 148px;
+  padding: 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-solid);
+  box-shadow: 0 8px 20px #0003;
+  display: grid;
+  gap: 3px;
+}
+
+.toolbar-file-options .toolbar-btn { text-align: left; padding: 7px 10px; }
+
 .toolbar-btn {
-  font-size: 10px;
-  letter-spacing: 0.02em;
+  min-height: 26px;
+  border: 1px solid transparent;
+  padding: 4px 5px;
+  font-size: 9px;
+  letter-spacing: 0.08em;
   color: var(--fg-muted);
-  text-transform: lowercase;
-  transition: color 0.12s;
+  text-transform: uppercase;
+  transition: color 0.12s, background 0.12s, border-color 0.12s;
   white-space: nowrap;
 }
 
 .toolbar-btn:hover {
   color: var(--fg);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  border-color: var(--border-strong);
+  background: var(--accent-soft);
+  text-decoration: none;
 }
 
 .toolbar-btn:disabled {
@@ -179,7 +329,7 @@ button:focus-visible {
 }
 
 .toolbar-btn-primary {
-  color: #ffffff;
+  color: var(--primary-text);
   border: 1px solid var(--accent);
   background: var(--accent);
   padding: 4px 9px;
@@ -187,13 +337,19 @@ button:focus-visible {
 }
 
 .toolbar-btn-primary:hover {
-  background: var(--bg);
+  background: var(--surface-solid);
   color: var(--accent);
   text-decoration: none;
 }
 
 .toolbar-btn-active {
   color: var(--accent);
+}
+
+.toolbar-protected-state {
+  font-size: 9px;
+  white-space: nowrap;
+  color: var(--danger);
 }
 
 .toolbar-sep {
@@ -212,7 +368,7 @@ button:focus-visible {
 .toolbar-label {
   color: var(--fg-muted);
   letter-spacing: 0.06em;
-  text-transform: lowercase;
+  text-transform: uppercase;
 }
 
 .toolbar-num {
@@ -232,6 +388,7 @@ button:focus-visible {
 .toolbar-save-unsaved { color: var(--fg); }
 
 .toolbar-save-light {
+  flex-shrink: 0;
   width: 7px;
   height: 7px;
   border-radius: 0;
@@ -250,10 +407,51 @@ button:focus-visible {
 
 /* ─── layout ─────────────────────────────────────────────────────────────── */
 .layout {
+  position: relative;
   display: flex;
   flex: 1;
   min-height: 0;
   overflow: hidden;
+}
+
+/* The upper marks belong to the editor viewport, below its formatting bar.
+   Anchoring them here also clears the bar when its buttons wrap on a small
+   window. The empty launch view uses the same marks with its original inset. */
+.layout:not(.layout-with-editor)::before,
+.layout:not(.layout-with-editor)::after,
+.editor-standard .editor-viewport::before,
+.editor-standard .editor-viewport::after {
+  content: '';
+  position: absolute;
+  z-index: 6;
+  top: 4px;
+  width: 78px;
+  height: 50px;
+  pointer-events: none;
+  opacity: 0.78;
+}
+
+.layout:not(.layout-with-editor)::before,
+.editor-standard .editor-viewport::before {
+  left: 12px;
+  border-top: 4px solid var(--art-cyan);
+  border-left: 1px solid var(--art-cyan);
+}
+
+.layout:not(.layout-with-editor)::after,
+.editor-standard .editor-viewport::after {
+  right: 12px;
+  border-top: 4px solid var(--art-copper);
+  border-right: 1px solid var(--art-copper);
+}
+
+.layout:not(.layout-with-editor)::before,
+.layout:not(.layout-with-editor)::after {
+  top: 42px;
+}
+
+.layout:not(.layout-with-editor)::after {
+  right: calc(var(--library-width, 30px) + 12px);
 }
 
 .sidebar-left,
@@ -295,8 +493,10 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--accent);
-  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  outline: 1px solid color-mix(in srgb, var(--art-copper) 54%, transparent);
+  outline-offset: 7px;
+  background: var(--surface-solid);
   transform-origin: center;
   animation: focus-window-open 480ms cubic-bezier(0.18, 0.82, 0.22, 1) both;
 }
@@ -308,8 +508,9 @@ button:focus-visible {
   justify-content: space-between;
   gap: 16px;
   padding: 9px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
+  border-bottom: 1px solid var(--border-strong);
+  background-color: var(--surface-quiet);
+
   flex-shrink: 0;
 }
 
@@ -418,6 +619,101 @@ button:focus-visible {
   }
 }
 
+/* ─── error report dialog ─────────────────────────────────────────────────
+   File failures keep their technical detail available without making the
+   first message intimidating. The copy button packages it for Codex. */
+.error-report-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--bg) 38%, transparent);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.error-report-dialog {
+  width: min(620px, 100%);
+  max-height: min(680px, calc(100vh - 48px));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+  border: 1px solid var(--danger);
+  outline: 1px solid color-mix(in srgb, var(--art-copper) 48%, transparent);
+  outline-offset: 6px;
+  padding: 18px;
+  background: var(--surface-solid);
+}
+
+.error-report-dialog header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.error-report-kicker {
+  margin-bottom: 4px;
+  color: var(--danger);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.error-report-dialog h2 {
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.error-report-dialog p,
+.error-report-actions span {
+  color: var(--fg-muted);
+  font-size: 10px;
+}
+
+.error-report-dialog pre {
+  min-height: 140px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  padding: 12px;
+  background: var(--bg-tint);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 9px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  user-select: text;
+}
+
+.error-report-close {
+  color: var(--fg-muted);
+  font-size: 10px;
+}
+
+.error-report-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.error-report-actions button {
+  border: 1px solid var(--accent);
+  padding: 6px 9px;
+  background: var(--accent);
+  color: var(--primary-text);
+  font-size: 10px;
+}
+
+.error-report-actions button:hover {
+  background: var(--bg);
+  color: var(--accent);
+}
+
 .sidebar-label-row {
   display: flex;
   align-items: center;
@@ -444,11 +740,11 @@ button:focus-visible {
 .sidebar {
   display: flex;
   flex-direction: column;
-  border-color: var(--border);
+  border-color: var(--border-strong);
   border-style: solid;
   border-width: 0;
   overflow: hidden;
-  background: var(--bg);
+  background: var(--surface);
 }
 
 .sidebar-left  { border-right-width: 1px; }
@@ -461,8 +757,12 @@ button:focus-visible {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--fg-muted);
+  display: flex;
+  align-items: center;
   padding: 0 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-strong);
+  background-color: var(--surface-quiet);
+  background-image: repeating-linear-gradient(90deg, transparent 0 27px, color-mix(in srgb, var(--art-quiet) 23%, transparent) 27px 28px);
   flex-shrink: 0;
 }
 
@@ -474,20 +774,19 @@ button:focus-visible {
 .panel-header::before {
   content: '';
   position: absolute;
-  top: -1px;
-  left: 50%;
+  top: 9px;
+  left: 16px;
   width: 18px;
-  border-top: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border));
-  transform: translateX(-50%);
+  border-top: 3px solid var(--art-cyan);
 }
 
 .panel-header::after {
   content: '';
   position: absolute;
-  top: 4px;
-  left: 50%;
-  height: 4px;
-  border-left: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border));
+  right: 16px;
+  bottom: 8px;
+  width: 14px;
+  border-bottom: 2px solid var(--art-copper);
 }
 
 [data-theme="nautical"] .panel-header::before {
@@ -512,7 +811,7 @@ button:focus-visible {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 5px;
   padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-strong);
   flex-shrink: 0;
   position: relative;
   z-index: 2;
@@ -543,7 +842,7 @@ button:focus-visible {
   border-bottom: 1px solid var(--border);
   border-radius: 0;
   padding: 4px 1px;
-  background: var(--bg);
+  background: transparent;
   color: var(--fg);
   font-family: var(--font);
   font-size: 9px;
@@ -576,8 +875,9 @@ button:focus-visible {
   right: 0;
   max-height: 220px;
   overflow-y: auto;
-  border: 1px solid var(--accent);
-  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-solid);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--fg) 12%, transparent);
 }
 
 .library-jump-option {
@@ -598,7 +898,7 @@ button:focus-visible {
 .library-jump-option:hover,
 .library-jump-option.is-selected {
   border-left-color: var(--accent);
-  background: var(--bg-soft);
+  background: var(--surface-quiet);
   color: var(--accent);
 }
 
@@ -646,22 +946,63 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--bg);
+  background: var(--surface-solid);
+}
+
+.editor-standard {
+  /* Centre the writing surface in the whole window, independently of the
+     reminders and Library. The 22px is the two 10px outer margins + borders.
+     Equal space on both sides leaves room for the reminder card on the right. */
+  --reminder-rail-width: 190px;
+  --reminder-card-gap: 20px;
+  --reminder-edge-gap: 10px;
+  --reminder-rail-gap: calc(var(--reminder-card-gap) + var(--reminder-edge-gap));
+  --writing-surface-width: min(880px, calc(100vw - 22px - 2 * var(--library-width) - 2 * (var(--reminder-rail-width) + var(--reminder-rail-gap))));
 }
 
 [data-theme="nautical"] .editor-wrap {
-  /* Let the restrained Nautical grid show through the writing area. */
-  background: transparent;
+  /* Keep the page calm in Nautical too; the peripheral field supplies the
+     technical texture while the editor remains a clean writing surface. */
+  background: var(--surface-solid);
+}
+
+.editor-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .editor-scroll {
-  flex: 1;
+  position: relative;
+  z-index: 1;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  /* Balance any scrollbar space on both sides, including inside Focus. */
+  scrollbar-gutter: stable both-edges;
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: text;
+}
+
+.editor-reading-surface {
+  position: absolute;
+  inset: 0 auto 0 50%;
+  z-index: 0;
+  width: min(880px, 100%);
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--surface-solid) 97%, var(--bg));
+  border-left: 1px solid var(--border-strong);
+  border-right: 1px solid var(--border-strong);
+  box-shadow: inset 18px 0 26px -28px color-mix(in srgb, var(--fg) 38%, transparent), inset -18px 0 26px -28px color-mix(in srgb, var(--fg) 38%, transparent);
+  pointer-events: none;
+}
+
+[data-theme="nautical"] .editor-reading-surface {
+  /* The solid centre panel deliberately hides Nautical's grid behind text. */
+  border-color: rgba(101, 220, 228, 0.22);
 }
 
 .editor-content {
@@ -671,19 +1012,173 @@ button:focus-visible {
 }
 
 .editor-standard .editor-content {
-  /* This is the calm reading surface in the main window. Its generous inner
-     padding keeps the vertical rules a little way from the text itself. */
-  max-width: 880px;
-  min-height: 100%;
-  padding: 54px clamp(48px, 5vw, 72px);
-  background: var(--bg);
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  /* Keep text above the reading surface, with generous spacing from its
+     vertical rules so the frame feels like a margin rather than a card. */
+  width: var(--writing-surface-width);
+  max-width: none;
+  padding: 54px clamp(32px, 5vw, 72px);
+  transform: translateX(calc(var(--library-width) / 2));
 }
 
-[data-theme="nautical"] .editor-standard .editor-content {
-  /* The solid centre panel deliberately hides Nautical's grid behind text. */
-  border-color: rgba(101, 220, 228, 0.22);
+.editor-standard .editor-reading-surface {
+  left: calc(50% + var(--library-width) / 2);
+  width: var(--writing-surface-width);
+}
+
+/* ─── daily reminders ─────────────────────────────────────────────────────
+   The card floats to the right of the centred page. Its `top` value is supplied
+   by the editor's date-aware scroll tracker, keeping it with its own entry. */
+.daily-reminders-card {
+  position: absolute;
+  /* Follow the actual right edge of the writing surface. On a wide window the
+     card no longer drifts over to the library drawer; on a narrow window the
+     reserved rail still guarantees the card and text do not overlap. */
+  left: calc(
+    50%
+    + var(--library-width) / 2
+    + var(--writing-surface-width) / 2
+    + var(--reminder-card-gap)
+  );
+  z-index: 4;
+  width: var(--reminder-rail-width);
+  max-height: min(310px, calc(100% - 28px));
+  transform: translateY(-50%);
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-solid);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--fg) 7%, transparent);
+  animation: daily-reminders-arrive 150ms ease-out both;
+}
+
+[data-theme="nautical"] .daily-reminders-card {
+  border-color: var(--technical-border);
+  background: color-mix(in srgb, var(--panel-bg) 94%, transparent);
+  box-shadow: 0 0 0 1px rgba(101, 220, 228, 0.035), 0 12px 28px rgba(0, 0, 0, 0.24);
+}
+
+.daily-reminders-header {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--border-strong);
+  background-color: var(--surface-quiet);
+  background-image: repeating-linear-gradient(90deg, transparent 0 21px, color-mix(in srgb, var(--art-quiet) 22%, transparent) 21px 22px);
+  color: var(--fg-muted);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.daily-reminders-header time {
+  color: var(--fg);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+[data-theme="nautical"] .daily-reminders-header {
+  border-color: var(--technical-border);
+  color: var(--instrument-muted);
+}
+
+.daily-reminders-list {
+  max-height: 270px;
+  overflow-y: auto;
+  padding: 7px 7px 9px;
+}
+
+.daily-reminder-row {
+  display: grid;
+  grid-template-columns: 17px minmax(0, 1fr) 14px;
+  align-items: start;
+  gap: 5px;
+  min-height: 26px;
+  padding: 3px 2px;
+}
+
+.daily-reminder-check {
+  width: 13px;
+  height: 13px;
+  margin-top: 3px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 9px;
+  line-height: 1;
+}
+
+.daily-reminder-check:hover,
+.daily-reminder-check[aria-pressed="true"] {
+  border-color: var(--accent);
+}
+
+.daily-reminder-row textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 20px;
+  max-height: 82px;
+  resize: none;
+  overflow-y: auto;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  padding: 1px 0 3px;
+  outline: none;
+  background: transparent;
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.daily-reminder-row textarea:focus {
+  border-bottom-color: var(--accent);
+}
+
+.daily-reminder-row textarea::placeholder {
+  color: color-mix(in srgb, var(--fg-muted) 72%, transparent);
+}
+
+.daily-reminder-row.is-done textarea {
+  color: var(--fg-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.daily-reminder-remove {
+  opacity: 0;
+  color: var(--fg-muted);
+  font-size: 12px;
+  line-height: 17px;
+  transition: opacity 100ms ease, color 100ms ease;
+}
+
+.daily-reminder-row:hover .daily-reminder-remove,
+.daily-reminder-remove:focus-visible {
+  opacity: 1;
+}
+
+.daily-reminder-remove:hover {
+  color: var(--danger);
+}
+
+.daily-reminder-new {
+  grid-template-columns: 17px minmax(0, 1fr);
+}
+
+.daily-reminder-bullet {
+  color: var(--accent);
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+}
+
+@keyframes daily-reminders-arrive {
+  from { opacity: 0; translate: 8px 0; }
+  to { opacity: 1; translate: 0 0; }
 }
 
 .editor-scroll.typewriter .editor-content {
@@ -734,14 +1229,15 @@ button:focus-visible {
   font-size: clamp(26px, 3vw, 38px);
   font-weight: 500;
   margin: 1.4em 0 0.6em;
-  letter-spacing: -0.04em;
-  color: var(--accent);
+  letter-spacing: -0.03em;
+  color: var(--fg);
 }
 
 .ProseMirror h2 {
   font-size: 18px;
   font-weight: 500;
   margin: 1.4em 0 0.6em;
+  color: var(--accent);
 }
 
 .ProseMirror h3 {
@@ -785,15 +1281,96 @@ button:focus-visible {
   text-decoration: underline;
 }
 
+/* Images and video cards remain part of the readable writing column. They are
+   saved as normal HTML, so they are also included in a rich copied selection. */
+.ProseMirror img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.6em auto;
+}
+
+.ProseMirror .youtube-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 1.6em 0;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-quiet);
+}
+
+.ProseMirror .youtube-card-thumbnail {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  display: block;
+  object-fit: cover;
+}
+
+.youtube-card-play {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 42px;
+  padding: 0 0 1px 3px;
+  border: 1px solid color-mix(in srgb, white 72%, transparent);
+  background: color-mix(in srgb, black 70%, transparent);
+  color: white;
+  font-size: 19px;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.youtube-card-play:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.youtube-card-caption {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--border-strong);
+  background: color-mix(in srgb, var(--surface-solid) 92%, transparent);
+}
+
+.youtube-card-label {
+  color: var(--fg);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.youtube-card-caption button {
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 10px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.youtube-card-caption button:hover {
+  color: var(--accent-strong);
+}
+
 /* ─── formatting toolbar ─────────────────────────────────────────────────── */
 .fmt-toolbar {
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 7px 18px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-strong);
   flex-shrink: 0;
-  background: var(--bg);
+  background-color: var(--surface-quiet);
+  /* Match the plain main toolbar instead of adding decorative vertical rules. */
   flex-wrap: wrap;
 }
 
@@ -813,6 +1390,7 @@ button:focus-visible {
 .fmt-btn:hover {
   color: var(--accent);
   background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 54%, transparent);
 }
 
 .fmt-btn-active {
@@ -835,16 +1413,47 @@ button:focus-visible {
 }
 
 .empty-state {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 18px;
+  min-width: min(520px, calc(100% - 48px));
+  padding: 46px 34px;
+  border: 1px solid var(--border-strong);
+  background: color-mix(in srgb, var(--surface-solid) 94%, transparent);
   text-align: center;
 }
 
+/* Corner markers make the empty view feel like an intentionally prepared
+   workspace rather than a generic blank screen. */
+.empty-state::before,
+.empty-state::after {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 20px;
+  pointer-events: none;
+}
+
+.empty-state::before {
+  top: 12px;
+  left: 12px;
+  border-top: 3px solid var(--art-cyan);
+  border-left: 1px solid var(--art-cyan);
+}
+
+.empty-state::after {
+  right: 12px;
+  bottom: 12px;
+  border-right: 1px solid var(--art-copper);
+  border-bottom: 3px solid var(--art-copper);
+}
+
 .empty-state-title {
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--fg-muted);
 }
@@ -861,14 +1470,14 @@ button:focus-visible {
   letter-spacing: 0.08em;
   border: 1px solid var(--accent);
   padding: 8px 20px;
-  color: #ffffff;
+  color: var(--primary-text);
   background: var(--accent);
   transition: background 150ms ease, color 150ms ease;
   text-transform: lowercase;
 }
 
 .empty-state-btn:hover {
-  background: var(--bg);
+  background: var(--surface-solid);
   color: var(--accent);
 }
 
@@ -973,14 +1582,28 @@ button:focus-visible {
   scrollbar-color: var(--border) transparent;
 }
 
-/* Small windows keep the document dominant and let compact controls wrap. */
+/* Narrow windows give status its own row, keeping Today/Focus centred and
+   preventing long counts or a protected-draft label from colliding with them. */
+@media (max-width: 1100px) {
+  .toolbar {
+    height: auto;
+    min-height: var(--toolbar-h);
+    padding-top: 7px;
+    padding-bottom: 7px;
+    gap: 6px 14px;
+  }
+
+  .toolbar-right {
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 720px) {
   .toolbar {
-    align-items: flex-start;
     height: auto;
     min-height: var(--toolbar-h);
     padding: 10px 14px;
-    flex-wrap: wrap;
   }
 
   .toolbar-left,
@@ -991,6 +1614,7 @@ button:focus-visible {
 
   .toolbar-right {
     width: 100%;
+    justify-content: flex-end;
   }
 
   .editor-content {
@@ -1001,6 +1625,43 @@ button:focus-visible {
     padding-left: 32px;
     padding-right: 32px;
   }
+
+  /* With Library open at the minimum window width, spend less of the
+     remaining page on margins so words still have room to wrap. */
+  .library-expanded .editor-standard .editor-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* A small window cannot fit a centred writing column and a side card.
+   Keep the card accessible in its own lower-right row, never over the text.
+   Opening Library needs this fallback a little sooner because it uses space. */
+/* These two selectors share the same fallback without changing the document
+   or the date-aware reminder tracking; only their placement changes. */
+@media (max-width: 1100px) {
+  .library-collapsed .editor-standard {
+    --writing-surface-width: min(880px, calc(100vw - 46px - 2 * var(--library-width)));
+  }
+  .library-collapsed .editor-standard .editor-viewport { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+  .library-collapsed .editor-standard .editor-scroll { grid-row: 1; min-height: 0; }
+  .library-collapsed .daily-reminders-card {
+    position: relative; grid-row: 2; justify-self: end;
+    top: auto !important; left: auto; transform: none;
+    margin: 8px 12px; max-height: 150px; overflow-y: auto;
+  }
+}
+@media (max-width: 1280px) {
+  .library-expanded .editor-standard {
+    --writing-surface-width: min(880px, calc(100vw - 46px - 2 * var(--library-width)));
+  }
+  .library-expanded .editor-standard .editor-viewport { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+  .library-expanded .editor-standard .editor-scroll { grid-row: 1; min-height: 0; }
+  .library-expanded .daily-reminders-card {
+    position: relative; grid-row: 2; justify-self: end;
+    top: auto !important; left: auto; transform: none;
+    margin: 8px 12px; max-height: 150px; overflow-y: auto;
+  }
 }
 
 /* Respect system settings for people who prefer no interface motion. */
@@ -1010,4 +1671,107 @@ button:focus-visible {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+}
+
+/* Inline diagram cards are ordinary journal blocks. The editing window uses
+   the same colours and square controls as the rest of Journal. */
+.journal-diagram-card {
+  margin: 26px 0;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-solid);
+  overflow: hidden;
+}
+.journal-diagram-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.journal-diagram-caption > div { min-width: 0; display: grid; gap: 5px; }
+.journal-diagram-caption strong { font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+.diagram-kicker { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-muted); }
+.journal-diagram-preview { display: block; width: 100%; padding: 0; cursor: pointer; background: #f4f0e5; }
+.journal-diagram-preview img { display: block; width: 100%; max-height: 400px; object-fit: contain; margin: 0 !important; }
+.journal-diagram-preview:disabled { cursor: default; }
+.journal-diagram-unavailable { padding: 16px; font-size: 12px; color: var(--fg-muted); }
+.journal-diagram-card.ProseMirror-selectednode { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Above Focus, below copyable error reports. Errors must stay reachable even
+   when a diagram is open during a failed save or a protected-file transition. */
+.diagram-overlay {
+  position: fixed; inset: 0; z-index: 30;
+  display: flex; align-items: center; justify-content: center;
+  background: #0008; padding: 18px;
+}
+.diagram-window {
+  display: flex; flex-direction: column; width: min(1440px, 100%); height: min(900px, 100%);
+  min-width: 0; min-height: 0; overflow: hidden;
+  background: var(--surface-solid); color: var(--fg);
+  border: 1px solid var(--border-strong); box-shadow: 0 20px 80px #0005;
+}
+.diagram-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.diagram-heading { display: grid; gap: 5px; flex: 1; min-width: 0; }
+.diagram-heading input { font-size: 17px; background: transparent; color: var(--fg); width: 100%; border: 0; padding: 3px 0; }
+.diagram-button { border: 1px solid var(--border); padding: 7px 10px; font-size: 10px; color: var(--fg); white-space: nowrap; cursor: pointer; }
+.diagram-button:hover:not(:disabled), .diagram-button.is-active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.diagram-button:disabled { opacity: 0.38; cursor: not-allowed; }
+.diagram-primary { background: var(--accent); color: var(--primary-text); border-color: var(--accent); }
+.diagram-tools { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; padding: 10px 18px; border-bottom: 1px solid var(--border); }
+.diagram-tools-divider { height: 18px; width: 1px; background: var(--border); margin: 0 4px; }
+.diagram-zoom { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 11px; }
+.diagram-zoom > span { min-width: 36px; text-align: center; }
+.diagram-hint { padding: 8px 18px; color: var(--fg-muted); font-size: 11px; line-height: 1.5; border-bottom: 1px solid var(--border); }
+.diagram-body { display: flex; flex: 1; min-height: 0; }
+.diagram-canvas {
+  flex: 1; min-width: 0; position: relative; overflow: auto; overscroll-behavior: contain;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--border-strong) 0.7px, transparent 0.7px);
+  background-size: 22px 22px;
+}
+.diagram-world-size { position: relative; }
+.diagram-world { position: absolute; left: 0; top: 0; transform-origin: top left; }
+.diagram-edges { position: absolute; left: 0; top: 0; color: var(--accent); pointer-events: none; overflow: visible; }
+.diagram-edge-line { fill: none; stroke: var(--art-cyan, var(--accent)); stroke-width: 2; }
+.diagram-edge-hit { fill: none; stroke: transparent; stroke-width: 18; pointer-events: stroke; cursor: pointer; }
+.diagram-edges .is-selected .diagram-edge-line { stroke: var(--accent); stroke-width: 3; }
+.diagram-edges text { fill: var(--fg); stroke: var(--bg); stroke-width: 5; paint-order: stroke; font-size: 12px; pointer-events: auto; cursor: pointer; }
+.diagram-step { position: absolute; background: var(--surface-solid); border: 1px solid var(--border-strong); box-shadow: 0 3px 10px #0001; }
+.diagram-step.is-selected { outline: 2px solid var(--accent); outline-offset: 3px; }
+.diagram-step-note { background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface-solid)); border-style: dashed; }
+.diagram-drag { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 26px; padding: 3px 9px; border-bottom: 1px solid var(--border); color: var(--fg-muted); cursor: grab; touch-action: none; font-size: 11px; }
+.diagram-drag span { text-transform: uppercase; letter-spacing: 0.1em; font-size: 8px; }
+.diagram-drag:active { cursor: grabbing; }
+.diagram-step-select { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; width: 100%; height: calc(100% - 26px); padding: 8px 12px; cursor: pointer; color: var(--fg); overflow: hidden; }
+.diagram-step-select strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 14px; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; z-index: 1; }
+.diagram-step-date { font-size: 10px; color: var(--accent); z-index: 1; }
+.diagram-step-notes { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 10px; line-height: 1.35; color: var(--fg-muted); overflow-wrap: anywhere; }
+.diagram-step-decision { background: transparent; border: 0; box-shadow: none; }
+/* Keep the diamond at the same full-node bounds used by arrow geometry;
+   its temporary drag handle sits just above it while editing. */
+.diagram-step-decision .diagram-drag { position: absolute; top: -24px; height: 22px; background: var(--surface-solid); }
+.diagram-step-decision .diagram-step-select { height: 100%; padding-left: 43px; padding-right: 43px; }
+.diagram-diamond { position: absolute; inset: 0; width: 100%; height: 100%; fill: var(--surface-solid); stroke: var(--border-strong); stroke-width: 1.5; }
+.diagram-inspector { width: 256px; flex-shrink: 0; padding: 16px; overflow: auto; border-left: 1px solid var(--border); }
+.diagram-inspector h3 { font-size: 12px; font-weight: 500; margin: 0 0 14px; }
+.diagram-inspector p { font-size: 11px; color: var(--fg-muted); line-height: 1.7; margin-bottom: 14px; }
+.diagram-inspector label { display: grid; gap: 7px; color: var(--fg-muted); font-size: 10px; margin-bottom: 15px; }
+.diagram-inspector input, .diagram-inspector textarea, .diagram-inspector select { width: 100%; min-width: 0; border: 1px solid var(--border); background: var(--bg); color: var(--fg); padding: 8px; font: inherit; font-size: 12px; line-height: 1.5; }
+.diagram-inspector textarea { resize: vertical; }
+.diagram-inspector > .diagram-button { margin: 0 4px 7px 0; }
+.diagram-connection-list { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+.diagram-connection-item { display: block; text-align: left; width: 100%; padding: 9px 5px; border-bottom: 1px solid var(--border); color: var(--fg-muted); font-size: 10px; line-height: 1.5; overflow-wrap: anywhere; }
+.diagram-connection-item:hover, .diagram-connection-item.is-selected { color: var(--accent); background: var(--accent-soft); }
+.diagram-starters { position: absolute; z-index: 2; top: 60px; left: 30px; width: min(460px, calc(100% - 60px)); padding: 24px; background: var(--surface-solid); border: 1px solid var(--border); }
+.diagram-starters h2 { font-size: 16px; font-weight: 500; margin-bottom: 12px; }
+.diagram-starters p { font-size: 12px; color: var(--fg-muted); line-height: 1.7; margin-bottom: 20px; }
+.diagram-starters .diagram-button { margin: 0 8px 8px 0; }
+.diagram-footer { display: flex; justify-content: space-between; align-items: center; padding: 8px 18px; border-top: 1px solid var(--border); color: var(--fg-muted); font-size: 10px; }
+@media (max-width: 760px) {
+  .diagram-overlay { padding: 8px; }
+  .diagram-header, .diagram-tools { padding: 10px; gap: 6px; }
+  .diagram-inspector { width: 200px; padding: 10px; }
+  .diagram-zoom { margin-left: 0; }
+  .diagram-starters { top: 20px; left: 12px; width: calc(100% - 24px); padding: 16px; }
 }

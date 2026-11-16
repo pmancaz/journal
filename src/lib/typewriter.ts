@@ -29,3 +29,29 @@ export function centreCursorInScroller(editor: Editor, scroller: HTMLElement): v
   const max = scroller.scrollHeight - scroller.clientHeight
   scroller.scrollTop = Math.max(0, Math.min(target, max))
 }
+
+// Coalesce centering until WebKit has laid out the edited paragraph. In
+// particular, deleting a wrapped paragraph can change its height after the
+// transaction callback. A stale pre-layout scroll leaves an empty caret offscreen.
+export function createCursorCenterScheduler() {
+  let frame: number | null = null
+  const cancel = () => {
+    if (frame !== null) cancelAnimationFrame(frame)
+    frame = null
+  }
+  return {
+    cancel,
+    schedule(editor: Editor, scroller: HTMLElement) {
+      cancel()
+      const document = editor.state.doc
+      const selection = editor.state.selection
+      if (!selection.empty) return
+      frame = requestAnimationFrame(() => {
+        frame = null
+        // Do not turn a subsequent click or drag into an unexpected scroll.
+        if (editor.isDestroyed || editor.state.doc !== document || !editor.state.selection.eq(selection)) return
+        centreCursorInScroller(editor, scroller)
+      })
+    },
+  }
+}

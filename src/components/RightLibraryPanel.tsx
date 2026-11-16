@@ -1,16 +1,17 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { MonthGroup } from '../lib/journal'
 import { formatJournalDateDisplay } from '../lib/dates'
 
 type Props = {
+  collapsed: boolean
+  onCollapsedChange: (collapsed: boolean) => void
   groups: MonthGroup[]
   onJumpToDate: (date: Date) => void
 }
 
 type JumpMenu = 'year' | 'month' | 'date' | null
 
-export default function RightLibraryPanel({ groups, onJumpToDate }: Props) {
-  const [collapsed, setCollapsed] = useState(true)
+function RightLibraryPanel({ groups, onJumpToDate, collapsed, onCollapsedChange }: Props) {
   const [selectedYear, setSelectedYear] = useState('')
   const [selectedMonth, setSelectedMonth] = useState('')
   const [selectedDate, setSelectedDate] = useState('')
@@ -79,7 +80,7 @@ export default function RightLibraryPanel({ groups, onJumpToDate }: Props) {
       <aside className="sidebar sidebar-right sidebar-collapsed">
         <button
           className="sidebar-toggle"
-          onClick={() => setCollapsed(false)}
+          onClick={() => onCollapsedChange(false)}
           title="expand library"
           aria-label="expand library"
         >
@@ -95,7 +96,7 @@ export default function RightLibraryPanel({ groups, onJumpToDate }: Props) {
         <span>library</span>
         <button
           className="sidebar-toggle-inline"
-          onClick={() => setCollapsed(true)}
+          onClick={() => onCollapsedChange(true)}
           title="collapse library"
           aria-label="collapse library"
         >
@@ -165,3 +166,6 @@ export default function RightLibraryPanel({ groups, onJumpToDate }: Props) {
     </aside>
   )
 }
+
+// The date list stays still while body text and save indicators change.
+export default memo(RightLibraryPanel)

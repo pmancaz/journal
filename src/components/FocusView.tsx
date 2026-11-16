@@ -1,26 +1,28 @@
 import { useEffect, useRef, useState } from 'react'
 import Editor, { EditorBridge } from './Editor'
 import { formatJournalDate } from '../lib/dates'
-import { getPlainTextFromHtml } from '../lib/journal'
-import { countWords } from '../lib/wordCount'
+import { EditorSnapshot } from '../lib/editorSnapshot'
 
 type Props = {
   date: Date
   value: string
-  onChange: (value: string) => void
+  onChange: (value: string, snapshot: EditorSnapshot) => void
+  onBridgeReady: (bridge: EditorBridge | null) => void
+  onError: (error: unknown) => void
   onClose: () => void
+  editable?: boolean
 }
 
-export default function FocusView({ date, value, onChange, onClose }: Props) {
+export default function FocusView({ date, value, onChange, onClose, onBridgeReady, onError, editable = true }: Props) {
   const editorBridgeRef = useRef<EditorBridge | null>(null)
-  const [typewriterMode, setTypewriterMode] = useState(false)
-  const entryWords = countWords(getPlainTextFromHtml(value))
+  // Focus starts with the same preferred typewriter setting as the main editor.
+  const [typewriterMode, setTypewriterMode] = useState(true)
+  const [entryWords, setEntryWords] = useState(0)
 
   function closeFocusView() {
     // Ask TipTap for its newest value before closing, so the final few typed
     // characters are included even if its short sync delay has not elapsed.
-    const latestValue = editorBridgeRef.current?.getLatestMarkdown()
-    if (latestValue !== undefined) onChange(latestValue)
+    editorBridgeRef.current?.getLatestHtml()
     onClose()
   }
 
@@ -56,6 +58,7 @@ export default function FocusView({ date, value, onChange, onClose }: Props) {
               type="button"
               onClick={() => setTypewriterMode((current) => !current)}
               aria-pressed={typewriterMode}
+              disabled={!editable}
             >
               typewriter
             </button>
@@ -66,14 +69,21 @@ export default function FocusView({ date, value, onChange, onClose }: Props) {
         </header>
         <Editor
           value={value}
-          onChange={onChange}
+          onChange={(html, snapshot) => {
+            setEntryWords(snapshot.words)
+            onChange(html, snapshot)
+          }}
+          onSnapshot={snapshot => setEntryWords(snapshot.words)}
+          onError={onError}
           typewriterMode={typewriterMode}
           scrollToDate={null}
           onScrollToDateDone={() => undefined}
           autoFocus
           variant="focus"
+          editable={editable}
           onBridgeReady={(bridge) => {
             editorBridgeRef.current = bridge
+            onBridgeReady(bridge)
           }}
         />
       </section>
